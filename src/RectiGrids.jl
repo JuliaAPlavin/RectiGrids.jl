@@ -4,6 +4,7 @@ export Grid, grid, dimnames, axiskeys, KeyedArray, named_axiskeys
 
 using AxisKeys
 
+
 struct Grid{KS, T, N, TV <: Tuple} <: AbstractArray{T, N}
     axiskeys::TV
 end
@@ -14,6 +15,7 @@ end
 
 Base.size(a::Grid) = map(length, a.axiskeys)
 
+Base.getindex(A::Grid, I::Integer) = A[CartesianIndices(A)[I]]
 Base.getindex(A::Grid, I::Integer...) = eltype(A)(map((ax, i) -> ax[i], A.axiskeys, I))
 Base.getindex(A::Grid, I::Union{AbstractVector, Colon}...) = Grid{dimnames(A), eltype(A)}(map((ax, i) -> ax[i], A.axiskeys, I))
 Base.getindex(A::Grid, I::Union{Integer, AbstractVector, Colon}...) = throw("Mixed vector-integer indexing not supported yet")

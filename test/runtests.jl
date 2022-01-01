@@ -1,4 +1,5 @@
 using Test
+using StableRNGs
 using RectiGrids
 
 
@@ -28,6 +29,8 @@ end
     @test mp(a=:, b=:) == mp
     @test mp(a=1:5, b=[:x, :z]) isa Grid
     @test all(mp(a=3:5, b=[:x, :z]) .== [(a = 3, b = :x) (a = 3, b = :z); (a = 4, b = :x) (a = 4, b = :z); (a = 5, b = :x) (a = 5, b = :z)])
+
+    @test @inferred(mp[123]) == (a = 23, b = :y)
 end
 
 @testset "map" begin
@@ -92,6 +95,8 @@ end
     @test @inferred(ndims(mpt12)) == 4
     @test @inferred(mpt12[1, 2, 2, 1]) == (1, :y, 3, 1)
 
+    @test @inferred(mpt[123]) == (23, :y)
+
     KeyedArray(mpt)
 end
 
@@ -114,6 +119,18 @@ end
 @testset "default types" begin
     @test grid(a=1:100, b=[:x, :y, :z, :w]) == grid(NamedTuple, a=1:100, b=[:x, :y, :z, :w])
     @test grid(1:100, [:x, :y, :z, :w]) == grid(Tuple, 1:100, [:x, :y, :z, :w])
+end
+
+@testset "rand" begin
+    gt = grid(1:100, [:x, :y, :z, :w])
+    gnt = grid(a=1:100, b=[:x, :y, :z, :w])
+    @test @inferred(rand(gt)) ∈ gt
+    @test @inferred(rand(gt)) ∉ gnt
+    @test @inferred(rand(gnt)) ∈ gnt
+    @test @inferred(rand(gnt)) ∉ gt
+    @test @inferred(rand(StableRNG(123), gt)) == (44, :x)
+    @test length(rand(gt, 5)) == 5
+    @test rand(StableRNG(123), gt, 10) == [(44, :x), (35, :w), (52, :w), (78, :w), (4, :x), (82, :x), (81, :y), (48, :x), (14, :z), (70, :w)]
 end
 
 
