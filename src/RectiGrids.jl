@@ -22,14 +22,18 @@ end
 
 Base.size(a::RectiGrid) = map(length, a.axiskeys)
 
-Base.getindex(A::RectiGrid) = eltype(A)(map(_ -> nothing, A.axiskeys))
-Base.getindex(A::RectiGrid, I::Int...) = A[CartesianIndices(A)[I...]]
 Base.getindex(A::RectiGridNdim{N}, I::Vararg{Int, N}) where {N} = eltype(A)(map((ax, i) -> ax[i], A.axiskeys, I))
-Base.getindex(A::RectiGrid, I::Union{AbstractVector, Colon}...) = RectiGrid{dimnames(A), eltype(A)}(map((ax, i) -> ax[i], A.axiskeys, I))
-Base.getindex(A::RectiGrid, I::Union{Integer, AbstractVector, Colon}...) = throw("Mixed vector-integer indexing not supported yet")
+Base.getindex(A::RectiGridNdim{N}, I::Vararg{Union{AbstractVector, Colon}, N}) where {N} = RectiGrid{dimnames(A), eltype(A)}(map((ax, i) -> ax[i], A.axiskeys, I))
 function Base.getindex(A::RectiGrid; Ikw...)
-    I = AxisKeys.NamedDims.order_named_inds(Val(dimnames(A)); Ikw...)
-    return A[I...]
+    if isempty(Ikw)
+        # called rg[]: return the only element in a 1-element grid
+        @assert length(A) == 1
+        eltype(A)(Tuple{}())
+    else
+        # call like rg[a=..., b=..., ...]: resolve dimension names
+        I = AxisKeys.NamedDims.order_named_inds(Val(dimnames(A)); Ikw...)
+        return A[I...]
+    end
 end
 
 function Base.in(x, A::RectiGrid)

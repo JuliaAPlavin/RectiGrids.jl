@@ -3,7 +3,7 @@ using StaticArrays
 using StableRNGs
 using RectiGrids
 
-
+@testset begin
 @testset "array functions" begin
     mp = grid(NamedTuple, a=1:100, b=[:x, :y, :z, :w])
     @test isconcretetype(typeof(mp))
@@ -169,6 +169,7 @@ end
     @test @inferred(rand(StableRNG(123), gt)) == (44, :x)
     @test length(rand(gt, 5)) == 5
     @test rand(StableRNG(123), gt, 10) == [(44, :x), (35, :w), (52, :w), (78, :w), (4, :x), (82, :x), (81, :y), (48, :x), (14, :z), (70, :w)]
+end
 end
 
 using Documenter
