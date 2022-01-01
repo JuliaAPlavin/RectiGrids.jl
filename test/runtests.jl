@@ -112,3 +112,8 @@ end
 
 	KeyedArray(mptn)
 end
+
+@testset begin
+	@test grid(a=1:100, b=[:x, :y, :z, :w]) == grid(NamedTuple, a=1:100, b=[:x, :y, :z, :w])
+	@test grid(1:100, [:x, :y, :z, :w]) == grid(Tuple, 1:100, [:x, :y, :z, :w])
+end
