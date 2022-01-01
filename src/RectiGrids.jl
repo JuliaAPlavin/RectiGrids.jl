@@ -11,7 +11,10 @@ end
 
 (Grid{KS, NamedTuple})(axiskeys) where {KS} = Grid{KS, NamedTuple{KS, Tuple{eltype.(axiskeys)...}}}(axiskeys)
 (Grid{KS, Tuple})(axiskeys) where {KS} = Grid{KS, Tuple{eltype.(axiskeys)...}}(axiskeys)
-(Grid{KS, T})(axiskeys) where {KS, T} = Grid{KS, T, length(KS), typeof(axiskeys)}(axiskeys)
+function (Grid{KS, T})(axiskeys) where {KS, T}
+    first_elt = T(map(first, axiskeys))
+    Grid{KS, typeof(first_elt), length(KS), typeof(axiskeys)}(axiskeys)
+end
 
 Base.size(a::Grid) = map(length, a.axiskeys)
 
@@ -57,6 +60,8 @@ end
 grid(::Type{NamedTuple}; kwargs...) = Grid{keys(kwargs), NamedTuple}(values(values(kwargs)))
 grid(::Type{Tuple}; kwargs...) = Grid{keys(kwargs), Tuple}(values(values(kwargs)))
 grid(::Type{Tuple}, args::AbstractVector...) = Grid{eachindex(args), Tuple}(args)
+grid(::Type{T}; kwargs...) where {T<:AbstractVector} = Grid{keys(kwargs), T}(values(values(kwargs)))
+grid(::Type{T}, args::AbstractVector...) where {T<:AbstractVector} = Grid{eachindex(args), T}(args)
 grid(args::AbstractVector...) = grid(Tuple, args...)
 grid(; kwargs...) = grid(NamedTuple; kwargs...)
 

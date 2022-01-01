@@ -1,4 +1,5 @@
 using Test
+using StaticArrays
 using StableRNGs
 using RectiGrids
 
@@ -114,6 +115,13 @@ end
     @test_throws AssertionError grid(mptn, mptn)
 
     KeyedArray(mptn)
+end
+
+@testset "SVector grid" begin
+    mpt = grid(SVector, a=1:100, b=5:10)
+    @test isconcretetype(typeof(mpt))
+    @test isconcretetype(eltype(mpt))
+    @test @inferred(mpt[2, 3]) === SVector(2, 7)
 end
 
 @testset "default types" begin
