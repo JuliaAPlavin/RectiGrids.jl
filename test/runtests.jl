@@ -25,6 +25,26 @@ using RectiGrids
     @test @inferred(mp1(a=3)) == (a=3,)
 end
 
+@testset "empty grid" begin
+    mp = grid(NamedTuple)
+    @test isconcretetype(typeof(mp))
+    @test isconcretetype(eltype(mp))
+    @test @inferred(size(mp)) == ()
+    @test @inferred(axes(mp)) == ()
+    @test @inferred(length(mp)) == 1
+    @test @inferred(ndims(mp)) == 0
+    @test @inferred(mp[]) == (;)
+
+    mp = grid(Tuple)
+    @test isconcretetype(typeof(mp))
+    @test isconcretetype(eltype(mp))
+    @test @inferred(size(mp)) == ()
+    @test @inferred(axes(mp)) == ()
+    @test @inferred(length(mp)) == 1
+    @test @inferred(ndims(mp)) == 0
+    @test @inferred(mp[]) == ()
+end
+
 @testset "access grid" begin
     mp = grid(NamedTuple, a=1:100, b=[:x, :y, :z, :w])
     @test mp[:, :] == mp

@@ -22,6 +22,7 @@ end
 
 Base.size(a::RectiGrid) = map(length, a.axiskeys)
 
+Base.getindex(A::RectiGrid) = eltype(A)(map(_ -> nothing, A.axiskeys))
 Base.getindex(A::RectiGrid, I::Int...) = A[CartesianIndices(A)[I...]]
 Base.getindex(A::RectiGridNdim{N}, I::Vararg{Int, N}) where {N} = eltype(A)(map((ax, i) -> ax[i], A.axiskeys, I))
 Base.getindex(A::RectiGrid, I::Union{AbstractVector, Colon}...) = RectiGrid{dimnames(A), eltype(A)}(map((ax, i) -> ax[i], A.axiskeys, I))
