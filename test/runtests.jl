@@ -141,6 +141,9 @@ end
     @test rand(StableRNG(123), gt, 10) == [(44, :x), (35, :w), (52, :w), (78, :w), (4, :x), (82, :x), (81, :y), (48, :x), (14, :z), (70, :w)]
 end
 
+using Documenter
+doctest(RectiGrids; manual=false)
+
 
 import Aqua
 import CompatHelperLocal as CHL
