@@ -13,6 +13,16 @@ using RectiGrids
     @test @inferred(length(mp)) == 400
     @test @inferred(ndims(mp)) == 2
     @test @inferred(mp[1, 2]) == (a=1, b=:y)
+
+    mp1 = grid(NamedTuple, a=1:100)
+    @test isconcretetype(typeof(mp1))
+    @test isconcretetype(eltype(mp1))
+    @test @inferred(size(mp1)) == (100,)
+    @test @inferred(axes(mp1)) == (1:100,)
+    @test @inferred(length(mp1)) == 100
+    @test @inferred(ndims(mp1)) == 1
+    @test @inferred(mp1[3]) == (a=3,)
+    @test @inferred(mp1(a=3)) == (a=3,)
 end
 
 @testset "access grid" begin

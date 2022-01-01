@@ -11,6 +11,7 @@ using AxisKeys
 struct RectiGrid{KS, T, N, TV <: Tuple} <: AbstractArray{T, N}
     axiskeys::TV
 end
+const RectiGridNdim{N} = RectiGrid{KS, T, N} where {KS, T}
 
 (RectiGrid{KS, NamedTuple})(axiskeys) where {KS} = RectiGrid{KS, NamedTuple{KS, Tuple{eltype.(axiskeys)...}}}(axiskeys)
 (RectiGrid{KS, Tuple})(axiskeys) where {KS} = RectiGrid{KS, Tuple{eltype.(axiskeys)...}}(axiskeys)
@@ -21,8 +22,8 @@ end
 
 Base.size(a::RectiGrid) = map(length, a.axiskeys)
 
-Base.getindex(A::RectiGrid, I::Integer) = A[CartesianIndices(A)[I]]
-Base.getindex(A::RectiGrid, I::Integer...) = eltype(A)(map((ax, i) -> ax[i], A.axiskeys, I))
+Base.getindex(A::RectiGrid, I::Int...) = A[CartesianIndices(A)[I...]]
+Base.getindex(A::RectiGridNdim{N}, I::Vararg{Int, N}) where {N} = eltype(A)(map((ax, i) -> ax[i], A.axiskeys, I))
 Base.getindex(A::RectiGrid, I::Union{AbstractVector, Colon}...) = RectiGrid{dimnames(A), eltype(A)}(map((ax, i) -> ax[i], A.axiskeys, I))
 Base.getindex(A::RectiGrid, I::Union{Integer, AbstractVector, Colon}...) = throw("Mixed vector-integer indexing not supported yet")
 function Base.getindex(A::RectiGrid; Ikw...)
