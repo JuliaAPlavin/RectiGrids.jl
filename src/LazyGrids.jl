@@ -30,8 +30,8 @@ function (A::Grid)(args...)
 end
 
 function (A::Grid)(; kwargs...)
-    issubset(kwargs.itr, dimnames(A)) || error("some keywords not in list of names!")
-    args = map(s -> Base.sym_in(s, kwargs.itr) ? getfield(kwargs.data, s) : Colon(), dimnames(A))
+    issubset(keys(kwargs), dimnames(A)) || error("some keywords not in list of names!")
+    args = map(s -> Base.sym_in(s, keys(kwargs)) ? getfield(values(kwargs), s) : Colon(), dimnames(A))
     A(args...)
 end
 
