@@ -2,7 +2,7 @@ using Test
 using RectiGrids
 
 
-@testset begin
+@testset "array functions" begin
     mp = grid(NamedTuple, a=1:100, b=[:x, :y, :z, :w])
     @test isconcretetype(typeof(mp))
     @test isconcretetype(eltype(mp))
@@ -13,7 +13,7 @@ using RectiGrids
     @test @inferred(mp[1, 2]) == (a=1, b=:y)
 end
 
-@testset begin
+@testset "access grid" begin
     mp = grid(NamedTuple, a=1:100, b=[:x, :y, :z, :w])
     @test mp[:, :] == mp
     @test mp[1:3, 1:2] isa Grid
@@ -30,14 +30,14 @@ end
     @test all(mp(a=3:5, b=[:x, :z]) .== [(a = 3, b = :x) (a = 3, b = :z); (a = 4, b = :x) (a = 4, b = :z); (a = 5, b = :x) (a = 5, b = :z)])
 end
 
-@testset begin
+@testset "map" begin
     mp = grid(NamedTuple, a=1:100, b=[:x, :y, :z, :w])
     @test map(identity, mp) isa Array{<:NamedTuple, 2}
     @test size(map(identity, mp)) == size(mp)
     @test map(identity, mp)[3, 4] == mp[3, 4]
 end
 
-@testset begin
+@testset "AxisKeys functions" begin
     mp = grid(NamedTuple, a=1:100, b=[:x, :y, :z, :w])
     ka = @inferred(KeyedArray(mp))
     @test @inferred(ka(a=5, b=:z)) == (a=5, b=:z)
@@ -49,7 +49,7 @@ end
     @test named_axiskeys(mp) == named_axiskeys(ka) == (a=1:100, b=[:x, :y, :z, :w])
 end
 
-@testset begin
+@testset "combine grids" begin
     mp = grid(NamedTuple, a=1:100, b=[:x, :y, :z, :w])
     @test_throws AssertionError grid(mp, mp)
 
@@ -69,7 +69,7 @@ end
     @test @inferred(first(mp21)) == (c=1, d=10, a=1, b=:x)
 end
 
-@testset begin
+@testset "Tuple grid" begin
     mpt = grid(Tuple, a=1:100, b=[:x, :y, :z, :w])
     @test isconcretetype(typeof(mpt))
     @test isconcretetype(eltype(mpt))
@@ -95,7 +95,7 @@ end
     KeyedArray(mpt)
 end
 
-@testset begin
+@testset "Tuple unnamed grid" begin
     mptn = grid(Tuple, 1:100, [:x, :y, :z, :w])
     @test isconcretetype(typeof(mptn))
     @test isconcretetype(eltype(mptn))
@@ -111,7 +111,7 @@ end
     KeyedArray(mptn)
 end
 
-@testset begin
+@testset "default types" begin
     @test grid(a=1:100, b=[:x, :y, :z, :w]) == grid(NamedTuple, a=1:100, b=[:x, :y, :z, :w])
     @test grid(1:100, [:x, :y, :z, :w]) == grid(Tuple, 1:100, [:x, :y, :z, :w])
 end
