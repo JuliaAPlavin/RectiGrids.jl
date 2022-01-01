@@ -1,6 +1,6 @@
 module RectiGrids
 
-export Grid, grid, dimnames, axiskeys, KeyedArray, named_axiskeys
+export grid, dimnames, axiskeys, KeyedArray, named_axiskeys
 
 using AxisKeys
 
