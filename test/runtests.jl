@@ -117,3 +117,14 @@ end
     @test grid(a=1:100, b=[:x, :y, :z, :w]) == grid(NamedTuple, a=1:100, b=[:x, :y, :z, :w])
     @test grid(1:100, [:x, :y, :z, :w]) == grid(Tuple, 1:100, [:x, :y, :z, :w])
 end
+
+
+import Aqua
+import CompatHelperLocal as CHL
+@testset begin
+    CHL.@check()
+    Aqua.test_ambiguities(LazyGrids, recursive=false)
+    Aqua.test_unbound_args(LazyGrids)
+    Aqua.test_undefined_exports(LazyGrids)
+    Aqua.test_stale_deps(LazyGrids)
+end
