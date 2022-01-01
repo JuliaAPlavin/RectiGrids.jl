@@ -18,7 +18,7 @@ end
 @testset "access grid" begin
     mp = grid(NamedTuple, a=1:100, b=[:x, :y, :z, :w])
     @test mp[:, :] == mp
-    @test mp[1:3, 1:2] isa Grid
+    @test mp[1:3, 1:2] isa RectiGrid
     @test all(mp[1:3, 1:2] .== [(a = 1, b = :x) (a = 1, b = :y); (a = 2, b = :x) (a = 2, b = :y); (a = 3, b = :x) (a = 3, b = :y)])
     @test all(mp[1:3, [1, 2]] .== [(a = 1, b = :x) (a = 1, b = :y); (a = 2, b = :x) (a = 2, b = :y); (a = 3, b = :x) (a = 3, b = :y)])
     @test_broken mp[1:3, 1]
@@ -28,7 +28,7 @@ end
     @test mp(5, :z) == (a=5, b=:z)
     @test mp(a=5, b=:z) == (a=5, b=:z)
     @test mp(a=:, b=:) == mp
-    @test mp(a=1:5, b=[:x, :z]) isa Grid
+    @test mp(a=1:5, b=[:x, :z]) isa RectiGrid
     @test all(mp(a=3:5, b=[:x, :z]) .== [(a = 3, b = :x) (a = 3, b = :z); (a = 4, b = :x) (a = 4, b = :z); (a = 5, b = :x) (a = 5, b = :z)])
 
     @test @inferred(mp[123]) == (a = 23, b = :y)
