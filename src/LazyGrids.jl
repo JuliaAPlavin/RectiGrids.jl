@@ -59,9 +59,9 @@ grid(args::AbstractVector...) = grid(Tuple, args...)
 grid(; kwargs...) = grid(NamedTuple; kwargs...)
 
 function grid(a::Grid{KS1}, b::Grid{KS2}) where {KS1, KS2}
-	@assert isempty(intersect(KS1, KS2))
-	@assert Base.typename(eltype(a)) == Base.typename(eltype(b))
-	Grid{(dimnames(a)..., dimnames(b)...), Base.typename(eltype(a)).wrapper}((a.axiskeys..., b.axiskeys...))
+    @assert isempty(intersect(KS1, KS2))
+    @assert Base.typename(eltype(a)) == Base.typename(eltype(b))
+    Grid{(dimnames(a)..., dimnames(b)...), Base.typename(eltype(a)).wrapper}((a.axiskeys..., b.axiskeys...))
 end
 
 end
