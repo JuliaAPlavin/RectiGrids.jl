@@ -62,6 +62,20 @@ function AxisKeys.KeyedArray(a::Grid)
     end
 end
 
+"""
+```
+grid([T], xs, ys, ...) -> Grid
+grid([T], x=xs, y=ys, ...) -> Grid
+```
+
+Create a `Grid` object representing a rectilinear grid. Implements `AbstractArray` and `KeyedArray` interfaces.
+
+Pass positional arguments `xs, ys, ...` for a grid with unnamed dimensions, or keyword arguments `x=xs, y=ys, ...` for named dimensions.
+
+Type `T` can be `Tuple`, or a type with a `T(::Tuple)` constructor (e.g. `SVector`), or `NamedTuple` when dimensions are named.
+"""
+function grid end
+
 grid(::Type{NamedTuple}; kwargs...) = Grid{keys(kwargs), NamedTuple}(values(values(kwargs)))
 grid(::Type{Tuple}; kwargs...) = Grid{keys(kwargs), Tuple}(values(values(kwargs)))
 grid(::Type{Tuple}, args::AbstractVector...) = Grid{eachindex(args), Tuple}(args)
