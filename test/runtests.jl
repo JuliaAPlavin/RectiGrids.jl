@@ -1,6 +1,6 @@
 using Test
-using AxisKeys
 using LazyGrids
+
 
 @testset begin
     mp = grid(NamedTuple, a=1:100, b=[:x, :y, :z, :w])
@@ -46,9 +46,7 @@ end
     @test axiskeys(ka) == @inferred(axiskeys(mp)) == (1:100, [:x, :y, :z, :w])
     @test axiskeys(ka, 1) == axiskeys(mp, 1) == 1:100
     @test axiskeys(ka, :a) == axiskeys(mp, :a) == 1:100
-    @test AxisKeys.dim(ka, :a) == @inferred(AxisKeys.dim(mp, :a)) == 1
     @test named_axiskeys(mp) == named_axiskeys(ka) == (a=1:100, b=[:x, :y, :z, :w])
-    @test AxisKeys.NamedDims.named_size(mp) == AxisKeys.NamedDims.named_size(ka) == (a=100, b=4)
 end
 
 @testset begin

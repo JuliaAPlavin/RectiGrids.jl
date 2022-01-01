@@ -1,6 +1,6 @@
 module LazyGrids
 
-export Grid, grid
+export Grid, grid, dimnames, axiskeys, KeyedArray, named_axiskeys
 
 using AxisKeys
 
