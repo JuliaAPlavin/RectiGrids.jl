@@ -1,5 +1,5 @@
 using Test
-using LazyGrids
+using RectiGrids
 
 
 @testset begin
@@ -121,8 +121,8 @@ import Aqua
 import CompatHelperLocal as CHL
 @testset begin
     CHL.@check()
-    Aqua.test_ambiguities(LazyGrids, recursive=false)
-    Aqua.test_unbound_args(LazyGrids)
-    Aqua.test_undefined_exports(LazyGrids)
-    Aqua.test_stale_deps(LazyGrids)
+    Aqua.test_ambiguities(RectiGrids, recursive=false)
+    Aqua.test_unbound_args(RectiGrids)
+    Aqua.test_undefined_exports(RectiGrids)
+    Aqua.test_stale_deps(RectiGrids)
 end

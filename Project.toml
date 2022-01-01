@@ -1,5 +1,5 @@
-name = "LazyGrids"
-uuid = "8ac6120f-0cea-45a0-84ec-ecbce27b592d"
+name = "RectiGrids"
+uuid = "8ac6971d-971d-971d-971d-971d5ab1a71A"
 authors = ["Alexander Plavin <alexander@plav.in>"]
 version = "0.1.1"
 

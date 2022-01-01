@@ -1,4 +1,4 @@
-module LazyGrids
+module RectiGrids
 
 export Grid, grid, dimnames, axiskeys, KeyedArray, named_axiskeys
 
