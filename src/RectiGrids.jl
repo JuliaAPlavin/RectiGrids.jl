@@ -27,6 +27,11 @@ function Base.getindex(A::Grid; Ikw...)
     return A[I...]
 end
 
+function Base.in(x, A::Grid)
+    x isa eltype(A) || return false
+    all(map((xx, ax) -> xx ∈ ax, x, A.axiskeys))
+end
+
 function (A::Grid)(args...)
     @assert length(args) == ndims(A)
     inds_raw = map(AxisKeys.findindex, args, axiskeys(A))
