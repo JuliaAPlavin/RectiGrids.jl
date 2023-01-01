@@ -11,7 +11,7 @@ julia> G = grid(20:30, [:a, :b, :c])
 2-dimensional KeyedArray(...) with keys:
 ↓   11-element UnitRange{Int64}
 →   3-element Vector{Symbol}
-And data, 11×3 RectiGrids.RectiGridArr{Base.OneTo(2), Tuple{Int64, Symbol}, 2, Tuple{UnitRange{Int64}, Vector{Symbol}}}:
+And data, 11×3 RectiGrids.RectiGridArr{Base.OneTo(2), Tuple{Int64, Symbol}, 2, Tuple{Nothing, Nothing}, Tuple{UnitRange{Int64}, Vector{Symbol}}}:
        (:a)        (:b)        (:c)
  (20)    (20, :a)    (20, :b)    (20, :c)
  (21)    (21, :a)    (21, :b)    (21, :c)
@@ -66,7 +66,7 @@ julia> G = grid(x=20:30, y=[:a, :b, :c])
 2-dimensional KeyedArray(NamedDimsArray(...)) with keys:
 ↓   x ∈ 11-element UnitRange{Int64}
 →   y ∈ 3-element Vector{Symbol}
-And data, 11×3 RectiGrids.RectiGridArr{(:x, :y), NamedTuple{(:x, :y), Tuple{Int64, Symbol}}, 2, Tuple{UnitRange{Int64}, Vector{Symbol}}}:
+And data, 11×3 RectiGrids.RectiGridArr{(:x, :y), NamedTuple{(:x, :y), Tuple{Int64, Symbol}}, 2, Tuple{Nothing, Nothing}, Tuple{UnitRange{Int64}, Vector{Symbol}}}:
        (:a)                (:b)                (:c)
  (20)    (x = 20, y = :a)    (x = 20, y = :b)    (x = 20, y = :c)
  (21)    (x = 21, y = :a)    (x = 21, y = :b)    (x = 21, y = :c)

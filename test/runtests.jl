@@ -3,7 +3,7 @@ using StaticArrays
 using StableRNGs
 using RectiGrids
 
-@testset begin
+
 @testset "array functions" begin
     mp = grid(NamedTuple, a=1:100, b=[:x, :y, :z, :w])
     @test mp isa RectiGrid
@@ -25,6 +25,14 @@ using RectiGrids
     @test @inferred(ndims(mp1)) == 1
     @test @inferred(mp1[3]) == (a=3,)
     @test @inferred(mp1(a=3)) == (a=3,)
+
+    mp2 = grid(NamedTuple, a=[:x → "XXX", :y → "YYY"])
+    @test mp2 isa RectiGrid
+    @test isconcretetype(typeof(mp2))
+    @test isconcretetype(eltype(mp2))
+    @test @inferred(length(mp2)) == 2
+    @test @inferred(mp2[1]) == (a="XXX",)
+    @test @inferred(mp2(a=:y)) == (a="YYY",)
 end
 
 @testset "zero-dim grid" begin
@@ -202,7 +210,7 @@ end
     @test length(rand(gt, 5)) == 5
     @test rand(StableRNG(123), gt, 10) == [(44, :x), (35, :w), (52, :w), (78, :w), (4, :x), (82, :x), (81, :y), (48, :x), (14, :z), (70, :w)]
 end
-end
+
 
 using Documenter
 doctest(RectiGrids; manual=false)
