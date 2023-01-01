@@ -226,10 +226,6 @@ end
 end
 
 
-using Documenter
-doctest(RectiGrids; manual=false)
-
-
 import Aqua
 import CompatHelperLocal as CHL
 @testset begin
