@@ -9,11 +9,10 @@ using ConstructionBase: constructorof
 using AxisKeys
 
 
-# https://github.com/JuliaObjects/ConstructionBaseExtras.jl/pull/3 and https://github.com/JuliaObjects/ConstructionBaseExtras.jl/pull/4
+import ConstructionBase #, ConstructionBaseExtras
+# https://github.com/JuliaObjects/ConstructionBaseExtras.jl/pull/3
 using StaticArraysCore: SVector
-import ConstructionBase
-ConstructionBase.constructorof(::Type{SVector}) = SVector
-ConstructionBase.constructorof(sa::Type{<:SVector{S,<:Any}}) where {S} = SVector{S}
+ConstructionBase.constructorof(::Type{<:SVector}) = SVector
 
 
 include("pair.jl")
