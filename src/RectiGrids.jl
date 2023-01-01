@@ -6,13 +6,8 @@ end module RectiGrids
 export RectiGrid, grid, dimnames, axiskeys, KeyedArray, named_axiskeys, →
 
 using ConstructionBase: constructorof
+using ConstructionBaseExtras
 using AxisKeys
-
-
-import ConstructionBase #, ConstructionBaseExtras
-# https://github.com/JuliaObjects/ConstructionBaseExtras.jl/pull/3
-using StaticArraysCore: SVector
-ConstructionBase.constructorof(::Type{<:SVector}) = SVector
 
 
 include("pair.jl")
