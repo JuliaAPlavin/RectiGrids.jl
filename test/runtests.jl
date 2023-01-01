@@ -14,6 +14,7 @@ using RectiGrids
     @test @inferred(length(mp)) == 400
     @test @inferred(ndims(mp)) == 2
     @test @inferred(mp[1, 2]) == (a=1, b=:y)
+    @test @inferred(mp(a=10, b=:w)) == (a=10, b=:w)
 
     mp1 = grid(NamedTuple, a=1:100)
     @test mp1 isa RectiGrid
