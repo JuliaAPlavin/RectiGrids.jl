@@ -1,7 +1,7 @@
 name = "RectiGrids"
 uuid = "8ac6971d-971d-971d-971d-971d5ab1a71a"
 authors = ["Alexander Plavin <alexander@plav.in>"]
-version = "0.1.14"
+version = "0.1.15"
 
 [deps]
 AxisKeys = "94b1ba4f-4ee9-5380-92f1-94cde586c3c5"
