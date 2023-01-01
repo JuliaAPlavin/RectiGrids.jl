@@ -24,12 +24,12 @@ struct RectiGridArr{KS, T, N, TK <: Tuple, TV <: Tuple} <: AbstractArray{T, N}
 end
 const RectiGridArrNdim{N} = RectiGridArr{KS, T, N} where {KS, T}
 
-const RectiGrid = Union{
-    RectiGridArr,
-    KeyedArray{T, N, <:RectiGridArr} where {T, N},
-    KeyedArray{T, N, <:SubArray{T, N, <:RectiGridArr}} where {T, N},
-    KeyedArray{T, N, <:AxisKeys.NamedDimsArray{NS, TNS, N, <:RectiGridArr}} where {T, N, NS, TNS},
-    KeyedArray{T, N, <:AxisKeys.NamedDimsArray{NS, TNS, N, <:SubArray{T, N, <:RectiGridArr}}} where {T, N, NS, TNS},
+const RectiGrid{T, N} = Union{
+    RectiGridArr{KS, T, N} where {KS},
+    KeyedArray{T, N, <:RectiGridArr},
+    KeyedArray{T, N, <:SubArray{T, N, <:RectiGridArr}},
+    KeyedArray{T, N, <:AxisKeys.NamedDimsArray{NS, TNS, N, <:RectiGridArr}} where {NS, TNS},
+    KeyedArray{T, N, <:AxisKeys.NamedDimsArray{NS, TNS, N, <:SubArray{T, N, <:RectiGridArr}}} where {NS, TNS},
 }
 
 RectiGridArr{KS, T}(akvals::Tuple) where {KS, T} = RectiGridArr{KS, T}(keyarr.(akvals), valarr.(akvals))
@@ -119,6 +119,31 @@ end
     catch
         nothing
     end
+end
+
+
+
+function Base.deleteat!(g::RectiGridArrNdim{1}, inds)
+    isnothing(only(g.axiskeys)) || deleteat!(only(g.axiskeys), inds)
+    deleteat!(only(g.axisvals), inds)
+    return g
+end
+
+function Base.deleteat!(g::RectiGrid{<:Any, 1}, inds)
+    # only delete from axiskeys, array values share the same data
+    deleteat!(only(axiskeys(g)), inds)
+    return g
+end
+
+function Base.filter!(f, g::RectiGrid{<:Any, 1})
+    j = firstindex(g)
+    @inbounds for i in eachindex(g)
+        # only modify axiskeys, array values share the same data
+        axiskeys(g, 1)[j] = axiskeys(g, 1)[i]
+        j = ifelse(f(g[i]), j + 1, j)
+    end
+    deleteat!(g, j:lastindex(g))
+    return g
 end
 
 end

@@ -254,6 +254,21 @@ end
     @test rand(StableRNG(123), gt, 10) == [(44, :x), (35, :w), (52, :w), (78, :w), (4, :x), (82, :x), (81, :y), (48, :x), (14, :z), (70, :w)]
 end
 
+@testset "filter" begin
+    g = grid(a=10:15)
+    gf = filter(x -> x.a > 12, g)
+    @test gf isa RectiGrid
+    @test gf == grid(a=13:15)
+
+    g = grid(a=10:15, b=1:3)
+    gf = filter(x -> x.a > 12, g)
+    @test gf == vec(grid(a=13:15, b=1:3))
+
+    g = grid(a=collect(10:15))
+    @test filter!(x -> x.a > 12, g) === g
+    @test g == grid(a=13:15)
+end
+
 
 import Aqua
 import CompatHelperLocal as CHL
