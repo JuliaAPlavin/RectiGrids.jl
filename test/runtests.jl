@@ -186,6 +186,11 @@ end
     @test @inferred(grid(1:100, [:x, :y, :z, :w])) == grid(Tuple, 1:100, [:x, :y, :z, :w])
 end
 
+@testset "all dims as a single arg" begin
+    @test grid((a=1:5, b=[:x, :y])) == grid(a=1:5, b=[:x, :y])
+    @test grid((1:5, [:x, :y])) == grid(1:5, [:x, :y])
+end
+
 @testset "rand" begin
     gt = @inferred grid(1:100, [:x, :y, :z, :w])
     gnt = grid(a=1:100, b=[:x, :y, :z, :w])
