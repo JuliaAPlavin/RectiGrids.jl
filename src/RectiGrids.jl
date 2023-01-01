@@ -73,11 +73,8 @@ Type `T` can be `Tuple`, or a type with a `T(::Tuple)` constructor (e.g. `SVecto
 """
 function grid end
 
-grid(::Type{NamedTuple}; kwargs...) = RectiGridArr{keys(kwargs), NamedTuple}(values(values(kwargs))) |> KeyedArray
-grid(::Type{Tuple}; kwargs...) = RectiGridArr{keys(kwargs), Tuple}(values(values(kwargs))) |> KeyedArray
-grid(::Type{Tuple}, args::AbstractVector...) = RectiGridArr{eachindex(args), Tuple}(args) |> KeyedArray
-grid(::Type{T}; kwargs...) where {T<:AbstractVector} = RectiGridArr{keys(kwargs), T}(values(values(kwargs))) |> KeyedArray
-grid(::Type{T}, args::AbstractVector...) where {T<:AbstractVector} = RectiGridArr{eachindex(args), T}(args) |> KeyedArray
+grid(::Type{T}; kwargs...) where {T} = RectiGridArr{keys(kwargs), T}(values(values(kwargs))) |> KeyedArray
+grid(::Type{T}, args::AbstractVector...) where {T} = RectiGridArr{eachindex(args), T}(args) |> KeyedArray
 grid(args::AbstractVector...) = grid(Tuple, args...)
 grid(; kwargs...) = grid(NamedTuple; kwargs...)
 
