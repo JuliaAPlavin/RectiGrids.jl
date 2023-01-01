@@ -90,7 +90,7 @@ Type `T` can be `Tuple`, or a type with a `T(::Tuple)` constructor (e.g. `SVecto
 function grid end
 
 @inline grid(::Type{T}; kwargs...) where {T} = RectiGridArr{keys(kwargs), T}(values(values(kwargs))) |> KeyedArray
-@inline grid(::Type{T}, args::AbstractVector...) where {T} = RectiGridArr{eachindex(args), T}(args) |> KeyedArray
+@inline grid(::Type{T}, args::AbstractVector...) where {T} = RectiGridArr{grid_dimnames(T, args), T}(args) |> KeyedArray
 @inline grid(args::AbstractVector...) = grid(Tuple, args...)
 @inline grid(; kwargs...) = grid(NamedTuple; kwargs...)
 @inline grid(args::Tuple) = grid(Tuple, args...)
@@ -103,5 +103,23 @@ function grid end
 end
 
 grid(a::RectiGrid, b::RectiGrid) = _grid(AxisKeys.keyless_unname(a), AxisKeys.keyless_unname(b)) |> KeyedArray
+
+
+function grid_dimnames(T, args)
+    fnames = maybe_fieldnames(T)
+    if !isnothing(fnames) && length(fnames) == length(args)
+        fnames
+    else
+        eachindex(args)
+    end
+end
+
+@generated function maybe_fieldnames(::Type{T}) where {T}
+    try
+        ns = fieldnames(T)
+    catch
+        nothing
+    end
+end
 
 end

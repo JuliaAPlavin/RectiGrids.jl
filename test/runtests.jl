@@ -201,11 +201,35 @@ end
     @test @inferred(g[1, 2]) == S1(1, 10)
 
     @test_throws "S2 isn't constructible" grid(S2, 1:3, [5, 10])
+end
 
-    g = @inferred grid(S, a=1:3, b=[5, 10])
-    @test g isa RectiGrid
-    @test isconcretetype(eltype(g))
-    @test @inferred(g[1, 2]) == S(1, 10)
+struct S3
+    a::Int
+    b::Int
+end
+
+S3(a) = S3(a, a)
+
+@testset "auto dimnames" begin
+    g = @inferred grid(NamedTuple{(:a, :b)}, 1:3, [:x, :y])
+    @test named_axiskeys(g) == (a=1:3, b=[:x, :y])
+    @test g(a=3, b=:y) == (a=3, b=:y)
+
+    g = @inferred grid(S1, 1:3, [1, 2])
+    @test named_axiskeys(g) == (a=1:3, b=[1, 2])
+    @test g(a=3, b=2) == S1(3, 2)
+
+    g = @inferred grid(S1{Int}, 1:3, [1, 2])
+    @test named_axiskeys(g) == (a=1:3, b=[1, 2])
+    @test g(a=3, b=2) == S1(3, 2)
+
+    g = @inferred grid(S3, 1:3)
+    @test dimnames(g) == (:_,)
+    @test g(2) == S3(2, 2)
+
+    g = @inferred grid(S3, 1:3, 1:2)
+    @test named_axiskeys(g) == (a=1:3, b=[1, 2])
+    @test g(a=3, b=2) == S3(3, 2)
 end
 
 @testset "default types" begin
