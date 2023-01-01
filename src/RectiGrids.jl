@@ -79,14 +79,14 @@ Type `T` can be `Tuple`, or a type with a `T(::Tuple)` constructor (e.g. `SVecto
 """
 function grid end
 
-grid(::Type{T}; kwargs...) where {T} = RectiGridArr{keys(kwargs), T}(values(values(kwargs))) |> KeyedArray
-grid(::Type{T}, args::AbstractVector...) where {T} = RectiGridArr{eachindex(args), T}(args) |> KeyedArray
-grid(args::AbstractVector...) = grid(Tuple, args...)
-grid(; kwargs...) = grid(NamedTuple; kwargs...)
-grid(args::Tuple) = grid(Tuple, args...)
-grid(args::NamedTuple) = grid(NamedTuple; args...)
+@inline grid(::Type{T}; kwargs...) where {T} = RectiGridArr{keys(kwargs), T}(values(values(kwargs))) |> KeyedArray
+@inline grid(::Type{T}, args::AbstractVector...) where {T} = RectiGridArr{eachindex(args), T}(args) |> KeyedArray
+@inline grid(args::AbstractVector...) = grid(Tuple, args...)
+@inline grid(; kwargs...) = grid(NamedTuple; kwargs...)
+@inline grid(args::Tuple) = grid(Tuple, args...)
+@inline grid(args::NamedTuple) = grid(NamedTuple; args...)
 
-function _grid(a::RectiGridArr{KS1}, b::RectiGridArr{KS2}) where {KS1, KS2}
+@inline function _grid(a::RectiGridArr{KS1}, b::RectiGridArr{KS2}) where {KS1, KS2}
     @assert isempty(intersect(KS1, KS2))
     @assert Base.typename(eltype(a)) == Base.typename(eltype(b))
     RectiGridArr{(_dimnames(a)..., _dimnames(b)...), Base.typename(eltype(a)).wrapper}((a.axiskeys..., b.axiskeys...), (a.axisvals..., b.axisvals...))
