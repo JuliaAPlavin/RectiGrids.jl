@@ -190,6 +190,19 @@ end
     @test @inferred(mpt[2, 3]) === SVector(2, 7)
 end
 
+# struct S{T}
+#     a::T
+#     b::T
+# end
+
+# @testset "custom struct" begin
+#     g = grid(S, a=1:3, b=[5, 10])
+#     # g = @inferred grid(S, a=1:3, b=[5, 10])
+#     @test g isa RectiGrid
+#     @test isconcretetype(eltype(g))
+#     @test @inferred(g[1, 2]) == S(a=1, b=10)
+# end
+
 @testset "default types" begin
     @test grid(a=1:100, b=[:x, :y, :z, :w]) == grid(NamedTuple, a=1:100, b=[:x, :y, :z, :w])
     @test @inferred(grid(1:100, [:x, :y, :z, :w])) == grid(Tuple, 1:100, [:x, :y, :z, :w])
