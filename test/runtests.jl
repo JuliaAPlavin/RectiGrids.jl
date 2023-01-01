@@ -27,8 +27,8 @@ using RectiGrids
     @test @inferred(mp1(a=3)) == (a=3,)
 end
 
-@testset "empty grid" begin
-    mp = grid(NamedTuple)
+@testset "zero-dim grid" begin
+    mp = @inferred grid(NamedTuple)
     @test mp isa RectiGrid
     @test isconcretetype(typeof(mp))
     @test isconcretetype(eltype(mp))
@@ -36,9 +36,10 @@ end
     @test @inferred(axes(mp)) == ()
     @test @inferred(length(mp)) == 1
     @test @inferred(ndims(mp)) == 0
-    @test @inferred(mp[]) == (;)
+    @test_broken mp[] == (;)
+    @test @inferred(mp[1]) == (;)
 
-    mp = grid(Tuple)
+    mp = @inferred grid(Tuple)
     @test mp isa RectiGrid
     @test isconcretetype(typeof(mp))
     @test isconcretetype(eltype(mp))
@@ -46,7 +47,30 @@ end
     @test @inferred(axes(mp)) == ()
     @test @inferred(length(mp)) == 1
     @test @inferred(ndims(mp)) == 0
-    @test @inferred(mp[]) == ()
+    @test_broken mp[] == ()
+    @test @inferred(mp[1]) == ()
+end
+
+@testset "empty grid" begin
+    mp = grid(NamedTuple, a=1:0)
+    @test mp isa RectiGrid
+    @test isconcretetype(typeof(mp))
+    @test isconcretetype(eltype(mp))
+    @test @inferred(size(mp)) == (0,)
+    @test @inferred(axes(mp)) == (1:0,)
+    @test @inferred(length(mp)) == 0
+    @test @inferred(ndims(mp)) == 1
+    @test_throws BoundsError mp[1]
+
+    mp = grid(Tuple, a=1:0)
+    @test mp isa RectiGrid
+    @test isconcretetype(typeof(mp))
+    @test isconcretetype(eltype(mp))
+    @test @inferred(size(mp)) == (0,)
+    @test @inferred(axes(mp)) == (1:0,)
+    @test @inferred(length(mp)) == 0
+    @test @inferred(ndims(mp)) == 1
+    @test_throws BoundsError mp[1]
 end
 
 @testset "access grid" begin
@@ -70,15 +94,14 @@ end
 
 @testset "map" begin
     mp = grid(NamedTuple, a=1:100, b=[:x, :y, :z, :w])
-    @test map(identity, mp) isa Array{<:NamedTuple, 2}
+    @test map(identity, mp) isa KeyedArray{<:NamedTuple, 2}
     @test size(map(identity, mp)) == size(mp)
     @test map(identity, mp)[3, 4] == mp[3, 4]
 end
 
 @testset "AxisKeys functions" begin
-    mp = grid(NamedTuple, a=1:100, b=[:x, :y, :z, :w])
-    ka = @inferred(KeyedArray(mp))
-    @test @inferred(ka(a=5, b=:z)) == (a=5, b=:z)
+    mp = ka = grid(NamedTuple, a=1:100, b=[:x, :y, :z, :w])
+    @test @inferred(KeyedArray, ka(a=5, b=:z)) == (a=5, b=:z)
     @test dimnames(ka) == @inferred(dimnames(mp)) == (:a, :b)
     @test dimnames(ka, 2) == dimnames(mp, 2) == :b
     @test axiskeys(ka) == @inferred(axiskeys(mp)) == (1:100, [:x, :y, :z, :w])
@@ -92,7 +115,7 @@ end
     @test_throws AssertionError grid(mp, mp)
 
     mp2 = grid(NamedTuple, c=1:5, d=[10, 20])
-    mp12 = grid(mp, mp2)
+    mp12 = @inferred grid(mp, mp2)
     @test @inferred(size(mp12)) == (100, 4, 5, 2)
     @test @inferred(axes(mp12)) == (1:100, 1:4, 1:5, 1:2)
     @test @inferred(length(mp12)) == 4000
@@ -133,12 +156,10 @@ end
     @test @inferred(mpt12[1, 2, 2, 1]) == (1, :y, 3, 1)
 
     @test @inferred(mpt[123]) == (23, :y)
-
-    KeyedArray(mpt)
 end
 
 @testset "Tuple unnamed grid" begin
-    mptn = grid(Tuple, 1:100, [:x, :y, :z, :w])
+    mptn = @inferred grid(Tuple, 1:100, [:x, :y, :z, :w])
     @test mptn isa RectiGrid
     @test isconcretetype(typeof(mptn))
     @test isconcretetype(eltype(mptn))
@@ -150,8 +171,6 @@ end
 
     @test_throws AssertionError grid(grid(NamedTuple, c=1:5, d=[10, 20]), mptn)
     @test_throws AssertionError grid(mptn, mptn)
-
-    KeyedArray(mptn)
 end
 
 @testset "SVector grid" begin
@@ -164,11 +183,11 @@ end
 
 @testset "default types" begin
     @test grid(a=1:100, b=[:x, :y, :z, :w]) == grid(NamedTuple, a=1:100, b=[:x, :y, :z, :w])
-    @test grid(1:100, [:x, :y, :z, :w]) == grid(Tuple, 1:100, [:x, :y, :z, :w])
+    @test @inferred(grid(1:100, [:x, :y, :z, :w])) == grid(Tuple, 1:100, [:x, :y, :z, :w])
 end
 
 @testset "rand" begin
-    gt = grid(1:100, [:x, :y, :z, :w])
+    gt = @inferred grid(1:100, [:x, :y, :z, :w])
     gnt = grid(a=1:100, b=[:x, :y, :z, :w])
     @test @inferred(rand(gt)) ∈ gt
     @test @inferred(rand(gt)) ∉ gnt

@@ -8,66 +8,54 @@ export RectiGrid, grid, dimnames, axiskeys, KeyedArray, named_axiskeys
 using AxisKeys
 
 
-struct RectiGrid{KS, T, N, TV <: Tuple} <: AbstractArray{T, N}
+struct RectiGridArr{KS, T, N, TV <: Tuple} <: AbstractArray{T, N}
     axiskeys::TV
 end
-const RectiGridNdim{N} = RectiGrid{KS, T, N} where {KS, T}
+const RectiGridArrNdim{N} = RectiGridArr{KS, T, N} where {KS, T}
 
-(RectiGrid{KS, NamedTuple})(axiskeys) where {KS} = RectiGrid{KS, NamedTuple{KS, Tuple{eltype.(axiskeys)...}}}(axiskeys)
-(RectiGrid{KS, Tuple})(axiskeys) where {KS} = RectiGrid{KS, Tuple{eltype.(axiskeys)...}}(axiskeys)
-function (RectiGrid{KS, T})(axiskeys) where {KS, T}
-    first_elt = T(map(first, axiskeys))
-    RectiGrid{KS, typeof(first_elt), length(KS), typeof(axiskeys)}(axiskeys)
+const RectiGrid = Union{
+    RectiGridArr,
+    KeyedArray{T, N, <:RectiGridArr} where {T, N},
+    KeyedArray{T, N, <:SubArray{T, N, <:RectiGridArr}} where {T, N},
+    KeyedArray{T, N, <:AxisKeys.NamedDimsArray{NS, TNS, N, <:RectiGridArr}} where {T, N, NS, TNS},
+    KeyedArray{T, N, <:AxisKeys.NamedDimsArray{NS, TNS, N, <:SubArray{T, N, <:RectiGridArr}}} where {T, N, NS, TNS},
+}
+
+(RectiGridArr{KS, NamedTuple})(axiskeys) where {KS} = RectiGridArr{KS, NamedTuple{KS, Tuple{eltype.(axiskeys)...}}}(axiskeys)
+(RectiGridArr{KS, Tuple})(axiskeys) where {KS} = RectiGridArr{KS, Tuple{eltype.(axiskeys)...}}(axiskeys)
+function (RectiGridArr{KS, T})(axiskeys) where {KS, T}
+    # rely on return_type inference:
+    ET = Core.Compiler.return_type(T, Tuple{Tuple{map(eltype, axiskeys)...}})
+    # without relying on inference, but doesn't work for empty grids:
+    # ET = T(map(first, axiskeys)) |> typeof
+    RectiGridArr{KS, ET, length(KS), typeof(axiskeys)}(axiskeys)
 end
 
-Base.size(a::RectiGrid) = map(length, a.axiskeys)
+Base.size(a::RectiGridArr) = map(length, a.axiskeys)
 
-Base.getindex(A::RectiGridNdim{N}, I::Vararg{Int, N}) where {N} = eltype(A)(map((ax, i) -> ax[i], A.axiskeys, I))
-Base.getindex(A::RectiGridNdim{N}, I::Vararg{Union{AbstractVector, Colon}, N}) where {N} = RectiGrid{dimnames(A), eltype(A)}(map((ax, i) -> ax[i], A.axiskeys, I))
-function Base.getindex(A::RectiGrid; Ikw...)
-    if isempty(Ikw)
-        # called rg[]: return the only element in a 1-element grid
-        @assert length(A) == 1
-        eltype(A)(Tuple{}())
-    else
-        # call like rg[a=..., b=..., ...]: resolve dimension names
-        I = AxisKeys.NamedDims.order_named_inds(Val(dimnames(A)); Ikw...)
-        return A[I...]
-    end
-end
+Base.getindex(A::RectiGridArrNdim{N}) where {N} = eltype(A)(map(ax -> ax[], A.axiskeys))
+Base.getindex(A::RectiGridArrNdim{N}, I::Vararg{Int, N}) where {N} = eltype(A)(map((ax, i) -> ax[i], A.axiskeys, I))
+Base.getindex(A::RectiGridArrNdim{N}, I::Vararg{Union{AbstractVector, Colon}, N}) where {N} = RectiGridArr{dimnames(A), eltype(A)}(map((ax, i) -> ax[i], A.axiskeys, I))
 
 function Base.in(x, A::RectiGrid)
     x isa eltype(A) || return false
-    all(map((xx, ax) -> xx ∈ ax, x, A.axiskeys))
+    all(map((xx, ax) -> xx ∈ ax, x, axiskeys(A)))
 end
 
-function (A::RectiGrid)(args...)
-    @assert length(args) == ndims(A)
-    inds_raw = map(AxisKeys.findindex, args, axiskeys(A))
-    inds = Base.to_indices(A, inds_raw)
-    return A[inds...]
-end
+# don't define methods for AxisKeys functions, that's not needed
+# these are just simple accessors, to be used in this package only
+_dimnames(a::RectiGridArr{KS}) where {KS} = KS
+_axiskeys(a::RectiGridArr) = a.axiskeys
 
-function (A::RectiGrid)(; kwargs...)
-    issubset(keys(kwargs), dimnames(A)) || error("some keywords not in list of names!")
-    args = map(s -> Base.sym_in(s, keys(kwargs)) ? getfield(values(kwargs), s) : Colon(), dimnames(A))
-    A(args...)
-end
-
-AxisKeys.dimnames(a::RectiGrid{KS}) where {KS} = KS
-AxisKeys.dimnames(a::RectiGrid, d::Int) = dimnames(a)[d]
-
-AxisKeys.axiskeys(a::RectiGrid) = a.axiskeys
-AxisKeys.axiskeys(a::RectiGrid, d) = a.axiskeys[AxisKeys.dim(a, d)]
-
-AxisKeys.dim(a::RectiGrid, d) = AxisKeys.dim(dimnames(a), d)
-
-function AxisKeys.KeyedArray(a::RectiGrid)
-    if eltype(dimnames(a)) == Symbol
-        KeyedArray(NamedDimsArray{dimnames(a)}(a), axiskeys(a))
+function AxisKeys.KeyedArray(a::RectiGridArr)
+    if isempty(_dimnames(a))
+        # XXX: doesn't really matter for zero-dim grid, right?..
+        KeyedArray(NamedDimsArray{_dimnames(a)}(a), _axiskeys(a))
+    elseif eltype(_dimnames(a)) == Symbol
+        KeyedArray(NamedDimsArray{_dimnames(a)}(a), _axiskeys(a))
     else
-        @assert eltype(dimnames(a)) == Int
-        KeyedArray(a, axiskeys(a))
+        @assert eltype(_dimnames(a)) == Int
+        KeyedArray(a, _axiskeys(a))
     end
 end
 
@@ -85,18 +73,20 @@ Type `T` can be `Tuple`, or a type with a `T(::Tuple)` constructor (e.g. `SVecto
 """
 function grid end
 
-grid(::Type{NamedTuple}; kwargs...) = RectiGrid{keys(kwargs), NamedTuple}(values(values(kwargs)))
-grid(::Type{Tuple}; kwargs...) = RectiGrid{keys(kwargs), Tuple}(values(values(kwargs)))
-grid(::Type{Tuple}, args::AbstractVector...) = RectiGrid{eachindex(args), Tuple}(args)
-grid(::Type{T}; kwargs...) where {T<:AbstractVector} = RectiGrid{keys(kwargs), T}(values(values(kwargs)))
-grid(::Type{T}, args::AbstractVector...) where {T<:AbstractVector} = RectiGrid{eachindex(args), T}(args)
+grid(::Type{NamedTuple}; kwargs...) = RectiGridArr{keys(kwargs), NamedTuple}(values(values(kwargs))) |> KeyedArray
+grid(::Type{Tuple}; kwargs...) = RectiGridArr{keys(kwargs), Tuple}(values(values(kwargs))) |> KeyedArray
+grid(::Type{Tuple}, args::AbstractVector...) = RectiGridArr{eachindex(args), Tuple}(args) |> KeyedArray
+grid(::Type{T}; kwargs...) where {T<:AbstractVector} = RectiGridArr{keys(kwargs), T}(values(values(kwargs))) |> KeyedArray
+grid(::Type{T}, args::AbstractVector...) where {T<:AbstractVector} = RectiGridArr{eachindex(args), T}(args) |> KeyedArray
 grid(args::AbstractVector...) = grid(Tuple, args...)
 grid(; kwargs...) = grid(NamedTuple; kwargs...)
 
-function grid(a::RectiGrid{KS1}, b::RectiGrid{KS2}) where {KS1, KS2}
+function _grid(a::RectiGridArr{KS1}, b::RectiGridArr{KS2}) where {KS1, KS2}
     @assert isempty(intersect(KS1, KS2))
     @assert Base.typename(eltype(a)) == Base.typename(eltype(b))
-    RectiGrid{(dimnames(a)..., dimnames(b)...), Base.typename(eltype(a)).wrapper}((a.axiskeys..., b.axiskeys...))
+    RectiGridArr{(_dimnames(a)..., _dimnames(b)...), Base.typename(eltype(a)).wrapper}((a.axiskeys..., b.axiskeys...))
 end
+
+grid(a::RectiGrid, b::RectiGrid) = _grid(AxisKeys.keyless_unname(a), AxisKeys.keyless_unname(b)) |> KeyedArray
 
 end
