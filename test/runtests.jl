@@ -179,7 +179,7 @@ end
     @test @inferred(mpt[2, 3]) === SVector(2, 7)
 end
 
-struct S{T}
+struct S1{T}
     a::T
     b::T
 end
@@ -190,10 +190,15 @@ struct S2{T}
 end
 
 @testset "custom struct" begin
-    g = @inferred grid(S, 1:3, [5, 10])
+    g = @inferred grid(S1, 1:3, [5, 10])
     @test g isa RectiGrid
     @test isconcretetype(eltype(g))
-    @test @inferred(g[1, 2]) == S(1, 10)
+    @test @inferred(g[1, 2]) == S1(1, 10)
+
+    g = @inferred grid(S1, a=1:3, b=[5, 10])
+    @test g isa RectiGrid
+    @test isconcretetype(eltype(g))
+    @test @inferred(g[1, 2]) == S1(1, 10)
 
     @test_throws "S2 isn't constructible" grid(S2, 1:3, [5, 10])
 
