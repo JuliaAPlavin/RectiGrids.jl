@@ -5,7 +5,16 @@ end module RectiGrids
 
 export RectiGrid, grid, dimnames, axiskeys, KeyedArray, named_axiskeys, →
 
+using ConstructionBase: constructorof
 using AxisKeys
+
+
+# https://github.com/JuliaObjects/ConstructionBaseExtras.jl/pull/3 and https://github.com/JuliaObjects/ConstructionBaseExtras.jl/pull/4
+using StaticArraysCore: SVector
+import ConstructionBase
+ConstructionBase.constructorof(::Type{SVector}) = SVector
+ConstructionBase.constructorof(sa::Type{<:SVector{S,<:Any}}) where {S} = SVector{S}
+
 
 include("pair.jl")
 
@@ -29,9 +38,9 @@ RectiGridArr{KS, T}(akvals::Tuple) where {KS, T} = RectiGridArr{KS, T}(keyarr.(a
 (RectiGridArr{KS, Tuple})(akeys, avals) where {KS} = RectiGridArr{KS, Tuple{eltype.(avals)...}}(akeys, avals)
 function (RectiGridArr{KS, T})(akeys, avals) where {KS, T}
     # rely on return_type inference:
-    ET = Core.Compiler.return_type(T, Tuple{Tuple{map(eltype, avals)...}})
+    ET = Core.Compiler.return_type(constructorof(T), Tuple{map(eltype, avals)...})
     # without relying on inference, but doesn't work for empty grids:
-    # ET = T(map(first, avals)) |> typeof
+    # ET = constructorof(T)(map(first, avals)...) |> typeof
     RectiGridArr{KS, ET, length(KS), typeof(akeys), typeof(avals)}(akeys, avals)
 end
 
@@ -41,7 +50,7 @@ function Base.getindex(A::RectiGridArrNdim{N}, I_raw::Vararg{<:Any, N}) where {N
     I = to_indices(A, I_raw)
     is_scalar = I isa Tuple{Vararg{Integer}}
     if is_scalar
-        eltype(A)(map((ax, i) -> ax[i], A.axisvals, I))
+        constructorof(eltype(A))(map((ax, i) -> ax[i], A.axisvals, I)...)
     else
         all(i -> !(i isa Integer), I) || throw("Only all-scalar or all-nonscalar indexing is supported")
         RectiGridArr{dimnames(A), eltype(A)}(map((ax, i) -> ax[i], A.axisvals, I))

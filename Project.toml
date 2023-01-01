@@ -1,12 +1,16 @@
 name = "RectiGrids"
 uuid = "8ac6971d-971d-971d-971d-971d5ab1a71a"
 authors = ["Alexander Plavin <alexander@plav.in>"]
-version = "0.1.10"
+version = "0.1.11"
 
 [deps]
 AxisKeys = "94b1ba4f-4ee9-5380-92f1-94cde586c3c5"
+ConstructionBase = "187b0558-2788-49d3-abe0-74a17ed4e7c9"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+StaticArraysCore = "1e83bf80-4336-4d27-bf5d-d5a4f845583c"
 
 [compat]
 AxisKeys = "0.1.19, 0.2"
+ConstructionBase = "1.4.0"
+StaticArraysCore = "1.1.0"
 julia = "1.6"
