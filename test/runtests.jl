@@ -1,10 +1,9 @@
-using Test
-using StaticArrays
-using StableRNGs
-using RectiGrids
+using TestItems
+using TestItemRunner
+@run_package_tests
 
 
-@testset "array functions" begin
+@testitem "array functions" begin
     mp = @inferred grid(NamedTuple, a=1:100, b=[:x, :y, :z, :w])
     @test mp isa RectiGrid
     @test isconcretetype(eltype(mp))
@@ -33,7 +32,7 @@ using RectiGrids
     @test @inferred(mp2(a=:y)) == (a="YYY",)
 end
 
-@testset "zero-dim grid" begin
+@testitem "zero-dim grid" begin
     mp = @inferred grid(NamedTuple)
     @test mp isa RectiGrid
     @test isconcretetype(eltype(mp))
@@ -55,7 +54,7 @@ end
     @test @inferred(mp[1]) == ()
 end
 
-@testset "empty grid" begin
+@testitem "empty grid" begin
     mp = @inferred grid(NamedTuple, a=1:0)
     @test mp isa RectiGrid
     @test isconcretetype(eltype(mp))
@@ -75,7 +74,7 @@ end
     @test_throws BoundsError mp[1]
 end
 
-@testset "access grid" begin
+@testitem "access grid" begin
     mp = @inferred grid(NamedTuple, a=1:100, b=[:x, :y, :z, :w])
     @test mp[:, :] == mp
     @test mp[1:3, 1:2] isa RectiGrid
@@ -94,14 +93,14 @@ end
     @test @inferred(mp[123]) == (a = 23, b = :y)
 end
 
-@testset "map" begin
+@testitem "map" begin
     mp = @inferred grid(NamedTuple, a=1:100, b=[:x, :y, :z, :w])
     @test map(identity, mp) isa KeyedArray{<:NamedTuple, 2}
     @test size(map(identity, mp)) == size(mp)
     @test map(identity, mp)[3, 4] == mp[3, 4]
 end
 
-@testset "AxisKeys functions" begin
+@testitem "AxisKeys functions" begin
     ka = @inferred grid(NamedTuple, a=1:100, b=[:x, :y, :z, :w])
     @test @inferred(KeyedArray, ka(a=5, b=:z)) == (a=5, b=:z)
     @test dimnames(ka) == @inferred(dimnames(ka)) == (:a, :b)
@@ -112,7 +111,7 @@ end
     @test named_axiskeys(ka) == named_axiskeys(ka) == (a=1:100, b=[:x, :y, :z, :w])
 end
 
-@testset "combine grids" begin
+@testitem "combine grids" begin
     mp = @inferred grid(NamedTuple, a=1:100, b=[:x, :y, :z, :w])
     @test_throws AssertionError grid(mp, mp)
 
@@ -132,7 +131,7 @@ end
     @test @inferred(first(mp21)) == (c=1, d=10, a=1, b=:x)
 end
 
-@testset "Tuple grid" begin
+@testitem "Tuple grid" begin
     mpt = @inferred grid(Tuple, a=1:100, b=[:x, :y, :z, :w])
     @test mpt isa RectiGrid
     @test isconcretetype(eltype(mpt))
@@ -158,7 +157,7 @@ end
     @test @inferred(mpt[123]) == (23, :y)
 end
 
-@testset "Tuple unnamed grid" begin
+@testitem "Tuple unnamed grid" begin
     mptn = @inferred grid(Tuple, 1:100, [:x, :y, :z, :w])
     @test mptn isa RectiGrid
     @test isconcretetype(eltype(mptn))
@@ -172,24 +171,26 @@ end
     @test_throws AssertionError grid(mptn, mptn)
 end
 
-@testset "SVector grid" begin
+@testitem "SVector grid" begin
+    using StaticArrays
+
     mpt = @inferred grid(SVector, a=1:100, b=5:10)
     @test mpt isa RectiGrid
     @test isconcretetype(eltype(mpt))
     @test @inferred(mpt[2, 3]) === SVector(2, 7)
 end
 
-struct S1{T}
-    a::T
-    b::T
-end
+@testitem "custom struct" begin
+    struct S1{T}
+        a::T
+        b::T
+    end
+    
+    struct S2{T}
+        a::Int
+        b::Int
+    end
 
-struct S2{T}
-    a::Int
-    b::Int
-end
-
-@testset "custom struct" begin
     g = @inferred grid(S1, 1:3, [5, 10])
     @test g isa RectiGrid
     @test isconcretetype(eltype(g))
@@ -203,14 +204,19 @@ end
     @test_throws "S2 isn't constructible" grid(S2, 1:3, [5, 10])
 end
 
-struct S3
-    a::Int
-    b::Int
-end
+@testitem "auto dimnames" begin
+    struct S1{T}
+        a::T
+        b::T
+    end
 
-S3(a) = S3(a, a)
+    struct S3
+        a::Int
+        b::Int
+    end
+    
+    S3(a) = S3(a, a)
 
-@testset "auto dimnames" begin
     g = @inferred grid(NamedTuple{(:a, :b)}, 1:3, [:x, :y])
     @test named_axiskeys(g) == (a=1:3, b=[:x, :y])
     @test g(a=3, b=:y) == (a=3, b=:y)
@@ -232,17 +238,19 @@ S3(a) = S3(a, a)
     @test g(a=3, b=2) == S3(3, 2)
 end
 
-@testset "default types" begin
+@testitem "default types" begin
     @test @inferred (grid(a=1:100, b=[:x, :y, :z, :w])) == @inferred grid(NamedTuple, a=1:100, b=[:x, :y, :z, :w])
     @test @inferred(grid(1:100, [:x, :y, :z, :w])) == @inferred grid(Tuple, 1:100, [:x, :y, :z, :w])
 end
 
-@testset "all dims as a single arg" begin
+@testitem "all dims as a single arg" begin
     @test grid((a=1:5, b=[:x, :y])) == grid(a=1:5, b=[:x, :y])
     @test grid((1:5, [:x, :y])) == grid(1:5, [:x, :y])
 end
 
-@testset "rand" begin
+@testitem "rand" begin
+    using StableRNGs
+
     gt = grid(1:100, [:x, :y, :z, :w])
     gnt = grid(a=1:100, b=[:x, :y, :z, :w])
     @test @inferred(rand(gt)) ∈ gt
@@ -254,7 +262,7 @@ end
     @test rand(StableRNG(123), gt, 10) == [(44, :x), (35, :w), (52, :w), (78, :w), (4, :x), (82, :x), (81, :y), (48, :x), (14, :z), (70, :w)]
 end
 
-@testset "filter" begin
+@testitem "filter" begin
     g = grid(a=10:15)
     gf = filter(x -> x.a > 12, g)
     @test gf isa RectiGrid
@@ -270,12 +278,11 @@ end
 end
 
 
-import Aqua
-import CompatHelperLocal as CHL
-@testset begin
+@testitem "_" begin
+    import Aqua
+    Aqua.test_all(RectiGrids; ambiguities=false)
+    Aqua.test_ambiguities(RectiGrids)
+
+    import CompatHelperLocal as CHL
     CHL.@check()
-    Aqua.test_ambiguities(RectiGrids, recursive=false)
-    Aqua.test_unbound_args(RectiGrids)
-    Aqua.test_undefined_exports(RectiGrids)
-    Aqua.test_stale_deps(RectiGrids)
 end
