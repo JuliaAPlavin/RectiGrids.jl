@@ -37,16 +37,16 @@ end
 
 Base.size(a::RectiGridArr) = map(length, a.axisvals)
 
-is_scalar_index(I) = true
-is_scalar_index(I::Union{AbstractArray, Colon}) = false
-is_scalar_index(I::Tuple) = all(is_scalar_index, I)
-Base.getindex(A::RectiGridArrNdim{N}, I::Vararg{<:Any, N}) where {N} =
-    if is_scalar_index(I)
+function Base.getindex(A::RectiGridArrNdim{N}, I_raw::Vararg{<:Any, N}) where {N}
+    I = to_indices(A, I_raw)
+    is_scalar = I isa Tuple{Vararg{Integer}}
+    if is_scalar
         eltype(A)(map((ax, i) -> ax[i], A.axisvals, I))
     else
-        all(!is_scalar_index, I) || throw("Only all-scalar or all-nonscalar indexing is supported")
+        all(i -> !(i isa Integer), I) || throw("Only all-scalar or all-nonscalar indexing is supported")
         RectiGridArr{dimnames(A), eltype(A)}(map((ax, i) -> ax[i], A.axisvals, I))
     end
+end
 
 # don't define methods for AxisKeys functions, that's not needed
 # these are just simple accessors, to be used in this package only
