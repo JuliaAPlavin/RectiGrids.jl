@@ -41,6 +41,7 @@ function (RectiGridArr{KS, T})(akeys, avals) where {KS, T}
     ET = Core.Compiler.return_type(constructorof(T), Tuple{map(eltype, avals)...})
     # without relying on inference, but doesn't work for empty grids:
     # ET = constructorof(T)(map(first, avals)...) |> typeof
+    ET <: T && ET != Union{} || throw(ArgumentError("Type $T isn't constructible from provided values"))
     RectiGridArr{KS, ET, length(KS), typeof(akeys), typeof(avals)}(akeys, avals)
 end
 
