@@ -6,6 +6,7 @@ using RectiGrids
 @testset begin
 @testset "array functions" begin
     mp = grid(NamedTuple, a=1:100, b=[:x, :y, :z, :w])
+    @test mp isa RectiGrid
     @test isconcretetype(typeof(mp))
     @test isconcretetype(eltype(mp))
     @test @inferred(size(mp)) == (100, 4)
@@ -15,6 +16,7 @@ using RectiGrids
     @test @inferred(mp[1, 2]) == (a=1, b=:y)
 
     mp1 = grid(NamedTuple, a=1:100)
+    @test mp1 isa RectiGrid
     @test isconcretetype(typeof(mp1))
     @test isconcretetype(eltype(mp1))
     @test @inferred(size(mp1)) == (100,)
@@ -27,6 +29,7 @@ end
 
 @testset "empty grid" begin
     mp = grid(NamedTuple)
+    @test mp isa RectiGrid
     @test isconcretetype(typeof(mp))
     @test isconcretetype(eltype(mp))
     @test @inferred(size(mp)) == ()
@@ -36,6 +39,7 @@ end
     @test @inferred(mp[]) == (;)
 
     mp = grid(Tuple)
+    @test mp isa RectiGrid
     @test isconcretetype(typeof(mp))
     @test isconcretetype(eltype(mp))
     @test @inferred(size(mp)) == ()
@@ -105,6 +109,7 @@ end
 
 @testset "Tuple grid" begin
     mpt = grid(Tuple, a=1:100, b=[:x, :y, :z, :w])
+    @test mpt isa RectiGrid
     @test isconcretetype(typeof(mpt))
     @test isconcretetype(eltype(mpt))
     @test @inferred(size(mpt)) == (100, 4)
@@ -118,6 +123,7 @@ end
 
     mpt2 = grid(Tuple, c=[2, 3], d=[1])
     mpt12 = grid(mpt, mpt2)
+    @test mpt12 isa RectiGrid
     @test isconcretetype(typeof(mpt12))
     @test isconcretetype(eltype(mpt12))
     @test @inferred(size(mpt12)) == (100, 4, 2, 1)
@@ -133,6 +139,7 @@ end
 
 @testset "Tuple unnamed grid" begin
     mptn = grid(Tuple, 1:100, [:x, :y, :z, :w])
+    @test mptn isa RectiGrid
     @test isconcretetype(typeof(mptn))
     @test isconcretetype(eltype(mptn))
     @test @inferred(size(mptn)) == (100, 4)
@@ -149,6 +156,7 @@ end
 
 @testset "SVector grid" begin
     mpt = grid(SVector, a=1:100, b=5:10)
+    @test mpt isa RectiGrid
     @test isconcretetype(typeof(mpt))
     @test isconcretetype(eltype(mpt))
     @test @inferred(mpt[2, 3]) === SVector(2, 7)
