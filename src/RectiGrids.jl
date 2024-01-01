@@ -6,7 +6,6 @@ end module RectiGrids
 export RectiGrid, grid, dimnames, axiskeys, KeyedArray, named_axiskeys, →
 
 using ConstructionBase: constructorof
-using ConstructionBaseExtras
 using AxisKeys
 
 
