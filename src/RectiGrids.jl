@@ -42,7 +42,7 @@ end
 
 Base.size(a::RectiGridArr) = map(length, a.axisvals)
 
-function Base.getindex(A::RectiGridArrNdim{N}, I_raw::Vararg{<:Any, N}) where {N}
+function Base.getindex(A::RectiGridArrNdim{N}, I_raw::Vararg{Any, N}) where {N}
     I = to_indices(A, I_raw)
     is_scalar = I isa Tuple{Vararg{Integer}}
     if is_scalar
