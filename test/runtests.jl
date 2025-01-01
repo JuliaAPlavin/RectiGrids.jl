@@ -32,6 +32,13 @@ using TestItemRunner
     @test @inferred(mp2(a=:y)) == (a="YYY",)
 end
 
+@testitem "iterables as axiskeys" begin
+    mp = @inferred grid(NamedTuple, a=2, b=[:x, :y, :z, :w])
+    @test mp == grid(a=[2], b=[:x, :y, :z, :w])
+    mp = @inferred grid(NamedTuple, a=(i for i in 1:3), b=[:x, :y, :z, :w])
+    @test mp == grid(a=1:3, b=[:x, :y, :z, :w])
+end
+
 @testitem "zero-dim grid" begin
     mp = @inferred grid(NamedTuple)
     @test mp isa RectiGrid
